@@ -29,7 +29,6 @@ jobs:
           FUNCTION_NAME: rainCheck
           SCHEDULER_JOB_NAME: rain-check-trigger
           SCHEDULE: 30 7 * * 1-5
-        working-directory: ./raincheck
         run: |-
           gcloud functions deploy $FUNCTION_NAME \
             --entry-point=$FUNCTION_NAME \
