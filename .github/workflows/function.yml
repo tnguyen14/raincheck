@@ -1,0 +1,43 @@
+name: Deploy to GCP Cloud Functions
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: build-tridnguyen-com
+      REGION: us-central1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_email: "github-actions@build-tridnguyen-com.iam.gserviceaccount.com"
+          service_account_key: ${{ secrets.SA_KEY }}
+          project_id: "build-tridnguyen-com"
+
+      - name: raincheck
+        env:
+          FUNCTION_NAME: rainCheck
+          SCHEDULER_JOB_NAME: rain-check-trigger
+          SCHEDULE: 30 7 * * 1-5
+        working-directory: ./raincheck
+        run: |-
+          gcloud functions deploy $FUNCTION_NAME \
+            --entry-point=$FUNCTION_NAME \
+            --allow-unauthenticated \
+            --region "$REGION" \
+            --runtime nodejs10 \
+            --ingress-settings=all \
+            --trigger-http
+          gcloud scheduler jobs update http $SCHEDULER_JOB_NAME \
+            --schedule="$SCHEDULE" \
+            --uri="$(gcloud functions describe $FUNCTION_NAME --format='value(httpsTrigger.url)')"
