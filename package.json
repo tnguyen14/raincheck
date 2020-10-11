@@ -1,0 +1,7 @@
+{
+  "name": "rain-check",
+  "version": "1.0.0",
+  "dependencies": {
+    "simple-fetch": "^2.1.0"
+  }
+}
